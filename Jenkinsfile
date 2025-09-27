@@ -2,9 +2,8 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "my-web-app"
-        DOCKER_HUB_USER = "dipali1904"
-        DOCKER_HUB_PASS = credentials('docker-hub-creds')
+        IMAGE_NAME = "dipali1904/my-web-app"
+        IMAGE_TAG = "latest"
     }
 
     stages {
@@ -16,27 +15,37 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat "docker build -t %DOCKER_HUB_USER%/%IMAGE_NAME%:latest ."
+                bat """
+                    docker build -t %IMAGE_NAME%:%IMAGE_TAG% .
+                """
             }
         }
 
         stage('Login to Docker Hub') {
             steps {
-                bat """echo %DOCKER_HUB_PASS% | docker login -u %DOCKER_HUB_USER% --password-stdin"""
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    bat """
+                        docker logout
+                        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                    """
+                }
             }
         }
 
         stage('Push Image to Docker Hub') {
             steps {
-                bat "docker push %DOCKER_HUB_USER%/%IMAGE_NAME%:latest"
+                bat """
+                    docker push %IMAGE_NAME%:%IMAGE_TAG%
+                """
             }
         }
 
         stage('Deploy Container') {
             steps {
-                bat "docker stop %IMAGE_NAME% || exit 0"
-                bat "docker rm %IMAGE_NAME% || exit 0"
-                bat "docker run -d -p 7070:80 --name %IMAGE_NAME% %DOCKER_HUB_USER%/%IMAGE_NAME%:latest"
+                bat """
+                    docker rm -f web-container || echo Container not running
+                    docker run -d --name web-container -p 7070:80 %IMAGE_NAME%:%IMAGE_TAG%
+                """
             }
         }
     }
