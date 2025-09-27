@@ -4,7 +4,7 @@ pipeline {
     environment {
         IMAGE_NAME = "my-web-app"
         DOCKER_HUB_USER = "dipali1904"
-        DOCKER_HUB_PASS = credentials('docker-hub-creds') // Add Docker Hub creds in Jenkins
+        DOCKER_HUB_PASS = credentials('docker-hub-creds')
     }
 
     stages {
@@ -22,7 +22,7 @@ pipeline {
 
         stage('Login to Docker Hub') {
             steps {
-                bat "echo %DOCKER_HUB_PASS% | docker login -u %DOCKER_HUB_USER% --password-stdin"
+                bat """echo %DOCKER_HUB_PASS% | docker login -u %DOCKER_HUB_USER% --password-stdin"""
             }
         }
 
