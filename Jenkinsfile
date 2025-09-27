@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "my-web-app"
-        DOCKER_HUB_USER = "your-dockerhub-username"
+        DOCKER_HUB_USER = "dipali1904"
         DOCKER_HUB_PASS = credentials('docker-hub-creds') // Add Docker Hub creds in Jenkins
     }
 
